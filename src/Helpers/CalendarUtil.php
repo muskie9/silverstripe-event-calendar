@@ -49,29 +49,61 @@ class CalendarUtil
      */
     public static function format_character_replacements($start, $end)
     {
+        $start = new \DateTime("@$start");
+
+        // Check if $end is null before creating a DateTime object
+        if ($end === null) {
+            return [
+                $start->format('D'),
+                $start->format('l'),
+                date('j', $start->getTimestamp()),
+                date('d', $start->getTimestamp()),
+                date('S', $start->getTimestamp()),
+                date('n', $start->getTimestamp()),
+                date('m', $start->getTimestamp()),
+                $start->format('M'),
+                $start->format('F'),
+                date('y', $start->getTimestamp()),
+                date('Y', $start->getTimestamp()),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            ];
+        }
+
+        $end = new \DateTime("@$end");
+
         return [
-            strftime('%a', $start),
-            strftime('%A', $start),
-            date('j', $start),
-            date('d', $start),
-            date('S', $start),
-            date('n', $start),
-            date('m', $start),
-            strftime('%b', $start),
-            strftime('%B', $start),
-            date('y', $start),
-            date('Y', $start),
-            strftime('%a', $end),
-            strftime('%A', $end),
-            date('j', $end),
-            date('d', $end),
-            date('S', $end),
-            date('n', $end),
-            date('m', $end),
-            strftime('%b', $end),
-            strftime('%B', $end),
-            date('y', $end),
-            date('Y', $end),
+            $start->format('D'),
+            $start->format('l'),
+            date('j', $start->getTimestamp()),
+            date('d', $start->getTimestamp()),
+            date('S', $start->getTimestamp()),
+            date('n', $start->getTimestamp()),
+            date('m', $start->getTimestamp()),
+            $start->format('M'),
+            $start->format('F'),
+            date('y', $start->getTimestamp()),
+            date('Y', $start->getTimestamp()),
+            $end->format('D'),
+            $end->format('l'),
+            date('j', $end->getTimestamp()),
+            date('d', $end->getTimestamp()),
+            date('S', $end->getTimestamp()),
+            date('n', $end->getTimestamp()),
+            date('m', $end->getTimestamp()),
+            $end->format('M'),
+            $end->format('F'),
+            date('y', $end->getTimestamp()),
+            date('Y', $end->getTimestamp()),
         ];
     }
 
@@ -86,7 +118,7 @@ class CalendarUtil
         } else {
             $template = _t(Calendar::class.".$key", $key);
         }
-        
+
         return str_replace(
             self::$format_character_placeholders,
             self::format_character_replacements($start, $end),
@@ -110,7 +142,7 @@ class CalendarUtil
             }
             return substr($str, 0, 4) . "-" . substr($str, 4, 2) . "-" . substr($str, 6, 2);
         }
-        
+
         return date('Y-m-d');
     }
 
@@ -121,30 +153,37 @@ class CalendarUtil
     {
         $strStartDate = null;
         $strEndDate = null;
-        
-        $start = strtotime($startDate);
-        $end = strtotime($endDate);
-        
-        $startYear = date("Y", $start);
-        $startMonth = date("m", $start);
-        
-        $endYear = date("Y", $end);
-        $endMonth = date("m", $end);
-        
+
+        $start = new \DateTime($startDate);
+
+        $startYear = $start->format("Y");
+        $startMonth = $start->format("m");
+
         // Invalid date. Get me out of here!
-        if ($start < 1) {
+        if ($start === false) {
             return;
         }
 
+        // Check if $end is null before creating a DateTime object
+        if ($endDate === null) {
+            $key = self::ONE_DAY;
+            $dateString = self::localize($start->getTimestamp(), null, $key);
+            return [$dateString, ""];
+        }
+
+        $end = new \DateTime($endDate);
+        $endYear = $end->format("Y");
+        $endMonth = $end->format("m");
+
         // Only one day long!
-        if ($start == $end || !$end || $end < 1) {
+        if ($start == $end) {
             $key = self::ONE_DAY;
         } elseif ($startYear == $endYear) {
             $key = ($startMonth == $endMonth) ? self::SAME_MONTH_SAME_YEAR : self::DIFF_MONTH_SAME_YEAR;
         } else {
             $key = self::DIFF_MONTH_DIFF_YEAR;
         }
-        $dateString = self::localize($start, $end, $key);
+        $dateString = self::localize($start->getTimestamp(), $end->getTimestamp(), $key);
         $break = strpos($dateString, '$End');
         if ($break !== false) {
             $strStartDate = substr($dateString, 0, $break);
@@ -181,18 +220,18 @@ class CalendarUtil
     public static function get_months_map($key = '%b')
     {
         return [
-            '01' => strftime($key, strtotime('2000-01-01')),
-            '02' => strftime($key, strtotime('2000-02-01')),
-            '03' => strftime($key, strtotime('2000-03-01')),
-            '04' => strftime($key, strtotime('2000-04-01')),
-            '05' => strftime($key, strtotime('2000-05-01')),
-            '06' => strftime($key, strtotime('2000-06-01')),
-            '07' => strftime($key, strtotime('2000-07-01')),
-            '08' => strftime($key, strtotime('2000-08-01')),
-            '09' => strftime($key, strtotime('2000-09-01')),
-            '10' => strftime($key, strtotime('2000-10-01')),
-            '11' => strftime($key, strtotime('2000-11-01')),
-            '12' => strftime($key, strtotime('2000-12-01'))
+            '01' => (new \DateTime('2000-01-01'))->format($key),
+            '02' => (new \DateTime('2000-02-01'))->format($key),
+            '03' => (new \DateTime('2000-03-01'))->format($key),
+            '04' => (new \DateTime('2000-04-01'))->format($key),
+            '05' => (new \DateTime('2000-05-01'))->format($key),
+            '06' => (new \DateTime('2000-06-01'))->format($key),
+            '07' => (new \DateTime('2000-07-01'))->format($key),
+            '08' => (new \DateTime('2000-08-01'))->format($key),
+            '09' => (new \DateTime('2000-09-01'))->format($key),
+            '10' => (new \DateTime('2000-10-01'))->format($key),
+            '11' => (new \DateTime('2000-11-01'))->format($key),
+            '12' => (new \DateTime('2000-12-01'))->format($key)
         ];
     }
 
@@ -231,7 +270,7 @@ class CalendarUtil
     {
         uasort($data, [self::class, "date_sort_callback"]);
     }
-    
+
     /**
      * Callback used by column_sort
      */

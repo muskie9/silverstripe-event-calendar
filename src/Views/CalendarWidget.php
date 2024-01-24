@@ -52,9 +52,9 @@ class CalendarWidget extends ViewableData
 
     public function forTemplate()
     {
-        if (!Calendar::config()->jquery_included) {
+        /*if (!Calendar::config()->jquery_included) {
             Requirements::javascript('silverstripe/admin:thirdparty/jquery/jquery.min.js');
-        }
+        }*/
         Requirements::javascript("sunnysideup/silverstripe-event-calendar:client/dist/js/calendar_widget.js");
 
         $localeFile = _t(__CLASS__.'.DATEJSFILE', 'sunnysideup/silverstripe-event-calendar:client/dist/js/lang/calendar_en.js');

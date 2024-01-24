@@ -87,9 +87,9 @@ class CalendarController extends PageController
             Requirements::css('sunnysideup/silverstripe-event-calendar:client/dist/css/calendar.css');
         }
         if (Calendar::config()->include_calendar_js) {
-            if (!Calendar::config()->jquery_included) {
+            /*if (!Calendar::config()->jquery_included) {
                 Requirements::javascript('silverstripe/admin:thirdparty/jquery/jquery.min.js');
-            }
+            }*/
             Requirements::javascript('sunnysideup/silverstripe-event-calendar:client/dist/js/calendar.js');
         }
     }
@@ -336,7 +336,7 @@ class CalendarController extends PageController
     public function respond()
     {
         if (Director::is_ajax()) {
-            return $this->renderWith('EventList');
+            return $this->renderWith('UncleCheese\EventCalendar\Includes\EventList');
         }
         return [];
     }
