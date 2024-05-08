@@ -342,6 +342,7 @@ class Calendar extends Page
         $start,
         $end,
         $filter = null,
+        $join = null,
         $limit = null,
         $announcementFilter = null
     ) {
@@ -352,7 +353,7 @@ class Calendar extends Page
         $eventList = ArrayList::create();
 
         foreach ($this->getAllCalendars() as $calendar) {
-            if ($events = $calendar->getStandardEvents($start, $end, $filter)) {
+            if ($events = $calendar->getStandardEvents($start, $end, $filter, $join)) {
                 $eventList->merge($events);
             }
             $announcements = DataList::create($this->getAnnouncementClass())
@@ -397,7 +398,7 @@ class Calendar extends Page
      * @param string $filter Additional filters
      * @return DataList
      */
-    protected function getStandardEvents($start, $end, $filter = null)
+    protected function getStandardEvents($start, $end, $filter = null, $innerJoin = null)
     {
         $eventTable = Config::inst()->get($this->getEventClass(), 'table_name');
         $relation = $this->getDateToEventRelation();
@@ -406,6 +407,10 @@ class Calendar extends Page
         $list = DataList::create($this->getDateTimeClass())
             ->innerJoin($eventTable, "\"$relation\" = \"$eventTable\".\"ID\"")
             ->innerJoin($siteTreeTable, "\"$siteTreeTable\".\"ID\" = \"$eventTable\".\"ID\"");
+
+        if ($innerJoin) {
+            $list = $list->innerJoin($innerJoin['table'], $innerJoin['on']);
+        }
 
         $filters = [
             'Recursion:not' => 1
@@ -675,13 +680,14 @@ class Calendar extends Page
     /**
      * @return DataList
      */
-    public function UpcomingEvents($limit = 5, $filter = null)
+    public function UpcomingEvents($limit = 5, $filter = null, $join = null)
     {
         $date = Carbon::now();
         return $this->getEventList(
             $date->toDateString(),
             $date->addMonths($this->DefaultFutureMonths)->toDateString(),
             $filter,
+            $join,
             $limit
         )->limit($limit);
     }
